@@ -16,11 +16,14 @@ var printCmd = &cli.Command{
 		}
 		for i := 0; i < argsNum; i++ {
 			link := ctx.Args().Get(i)
-			cert, err := util.GetCert(link)
+			certs, err := util.GetCerts(link)
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf("%s: %s\n", cert.Subject.CommonName, cert.DNSNames)
+			fmt.Printf("Cert %d\n", i)
+			for _, cert := range certs {
+				fmt.Printf("%s: %s\n", cert.Subject.CommonName, cert.DNSNames)
+			}
 		}
 		return nil
 	},

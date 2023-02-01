@@ -9,28 +9,31 @@ import (
 	"net/url"
 )
 
-func GetCert(link string) (*x509.Certificate, error) {
+func GetCerts(link string) ([]*x509.Certificate, error) {
 	// TODO: map of protocols
 	u, err := url.Parse(link)
 	if err != nil {
 		return nil, err
 	}
-	var cert *x509.Certificate
+	var certs []*x509.Certificate
 	if u.Host == "" {
 		// TODO: not prettiest but less typing: handle error without overwriting err
-		cert, err = getCertFromFile(link)
+		cert, err := getCertFromFile(link)
+		if err != nil {
+			return nil, err
+		}
+		certs = append(certs, cert)
 	} else if u.Scheme == "https" {
-		cert, err = getCertFromHTTPS(u)
-	}
-	if err != nil {
-		return nil, err
+		certs, err = getCertFromHTTPS(u)
+		if err != nil {
+			return nil, err
+		}
 	}
 	// DEBUG: fmt.Printf("--- Host: %s ---\nScheme: %s\nHostname: %s\nPort: %s\n", u.Host, u.Scheme, u.Hostname(), u.Port())
-	return cert, nil
-
+	return certs, nil
 }
 
-func getCertFromHTTPS(u *url.URL) (*x509.Certificate, error) {
+func getCertFromHTTPS(u *url.URL) ([]*x509.Certificate, error) {
 	host := u.Host
 	var port string
 	if u.Port() == "" {
@@ -51,7 +54,7 @@ func getCertFromHTTPS(u *url.URL) (*x509.Certificate, error) {
 	}
 
 	// TODO: handle more than one certificate
-	return certs[0], nil
+	return certs, nil
 }
 
 func getCertFromFile(filePath string) (*x509.Certificate, error) {
@@ -68,4 +71,32 @@ func getCertFromFile(filePath string) (*x509.Certificate, error) {
 		return nil, err
 	}
 	return cert, nil
+}
+
+func CheckCert(cert *x509.Certificate) ([][]*x509.Certificate, error) {
+	/* TODO: expose in flags
+	x509.VerifyOptions{
+		DNSName:                   "",
+		Intermediates:             nil,
+		Roots:                     nil,
+		CurrentTime:               time.Time{},
+		KeyUsages:                 nil,
+		MaxConstraintComparisons: 0,
+	}*/
+	cerPool, _ := x509.SystemCertPool()
+	chains, err := cert.Verify(x509.VerifyOptions{
+		Roots: cerPool,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return chains, nil
+}
+
+func getSystemCertPool() *x509.CertPool {
+	CertPool, err := x509.SystemCertPool()
+	if err != nil {
+		CertPool = x509.NewCertPool()
+	}
+	return CertPool
 }
