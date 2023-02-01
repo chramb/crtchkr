@@ -1,31 +1,38 @@
 package discord
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/chramb/crtchkr/util"
+	"github.com/chramb/crtchkr/util/failed"
+	"github.com/urfave/cli/v2"
 	"net/http"
 	"strings"
+	"text/template"
 )
 
-type Discord struct {
-	Url string
-}
-
-func (d *Discord) Post(cn string, error string) {
-	data := fmt.Sprintf(`
-	{
-		"content": "%s"
+func Message(ctx *cli.Context, key string) error {
+	config, _, err := util.GetConfig(ctx.String("config"))
+	t, err := template.New("webhook_data").Parse(config.Discord[key].Request)
+	if err != nil {
+		fmt.Println(err)
 	}
-	`, error)
+	var buf bytes.Buffer
+	t.Execute(&buf, failed.Fc)
+	data := buf.String()
 
 	client := &http.Client{}
 	myReader := strings.NewReader(data)
-	req, err := http.NewRequest("POST", d.Url, myReader)
+	req, err := http.NewRequest("POST", config.Discord[key].Url, myReader)
 	if err != nil {
 		panic(err)
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
-	resp, err := client.Do(req)
-	fmt.Println(resp)
-
+	_, err = client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("Webhook Sent")
+	return nil
 }
