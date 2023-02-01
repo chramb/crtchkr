@@ -6,3 +6,4 @@ testdata/
 crtchkr
 # JetBrains IDE
 .idea/
+crtchkr.toml
