@@ -13,7 +13,8 @@ var App = &cli.App{
 	Flags:   []cli.Flag{},
 	Commands: []*cli.Command{
 		printCmd,
-		CheckCmd,
+		checkCmd,
+		msgCmd,
 	},
 }
 
