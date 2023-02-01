@@ -10,7 +10,9 @@ var App = &cli.App{
 	Usage:   "check validity of local and remote x509 certificates",
 	Version: "0.0.1-pre",
 	Action:  cli.ShowAppHelp,
-	Flags:   []cli.Flag{},
+	Flags: []cli.Flag{
+		configFlag,
+	},
 	Commands: []*cli.Command{
 		printCmd,
 		checkCmd,
