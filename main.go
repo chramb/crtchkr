@@ -11,7 +11,6 @@ import (
 func main() {
 	cli.VersionFlag = cmd.VersionFlag
 	app := cmd.App
-
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
