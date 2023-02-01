@@ -111,6 +111,5 @@ func getCertsFromFile(filePath string) ([]*x509.Certificate, error) {
 		certificates = append(certificates, cert)
 	}
 
-	// Print the Common Name of each certificate
 	return certificates, nil
 }
