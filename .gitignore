@@ -1,1 +1,8 @@
+# Todo list
 TODO.md
+# Test certificates
+testdata/
+# binary
+crtchkr
+# JetBrains IDE
+.idea/
