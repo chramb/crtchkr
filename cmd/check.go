@@ -38,7 +38,7 @@ func checkAction(ctx *cli.Context) error {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("\nFound %d certificates for %s\n", len(certs), link)
+		fmt.Printf("Found %d certificates for %s\n", len(certs), link)
 		certsLen := len(certs)
 		roots, _ := x509.SystemCertPool()
 		for i := certsLen - 1; i >= 0; i-- {
