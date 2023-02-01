@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crtchkr/cmd"
+	"github.com/chramb/crtchkr/cmd"
 	"log"
 	"os"
 
