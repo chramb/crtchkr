@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"crypto/x509"
 	"fmt"
 	"github.com/chramb/crtchkr/util"
 	"github.com/urfave/cli/v2"
 )
 
 // TODO: check all and success if any one is valid and has chain
-var CheckCmd = &cli.Command{
+var checkCmd = &cli.Command{
 	Name:  "check",
 	Usage: "check validity of certificate",
 	Action: func(ctx *cli.Context) error {
@@ -21,15 +22,30 @@ var CheckCmd = &cli.Command{
 			if err != nil {
 				panic(err)
 			}
-			for _, cert := range certs {
-				fmt.Printf("\n--Cert--\n")
-				fmt.Printf("cn: %s", cert.Subject.CommonName)
+			fmt.Printf("Found %d certificates.\n", len(certs))
+			certsLen := len(certs)
+			roots, _ := x509.SystemCertPool()
+			for i := certsLen - 1; i >= 0; i-- {
+				fmt.Printf("\n---- %d. ----\n", i)
+				cert := certs[i]
 				// TODO: if invalid fail gracefully and print error why failed
 				// TODO: check how many days left
-				chains, err := util.CheckCert(cert)
-				_ = chains
-				//fmt.Printf("chains: %s", chains)
-				fmt.Printf("%s\n", err)
+				chains, err := util.CheckCert(certs[i], roots)
+				if err != nil {
+					fmt.Printf("%s invalid certificate: %s\n", cert.Subject.CommonName, err)
+					fmt.Printf("signed by: %s\n", cert.Issuer.CommonName)
+					if i != 0 {
+						return cli.Exit("Warning Broken Chain!!", -666)
+					}
+				}
+				if chains != nil {
+					fmt.Printf("Valid Certificate! %s\n", cert.Subject.CommonName)
+					fmt.Printf("Chain lenght %d\n", len(chains))
+					if cert.IsCA {
+						roots.AddCert(cert)
+						// DEBUG: println("adding ", cert.Subject.CommonName, " to roots")
+					}
+				}
 			}
 		}
 		return nil

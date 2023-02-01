@@ -1,10 +1,11 @@
-package util
+package cert
 
 import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/url"
 )
@@ -18,16 +19,17 @@ func GetCerts(link string) ([]*x509.Certificate, error) {
 	var certs []*x509.Certificate
 	if u.Host == "" {
 		// TODO: not prettiest but less typing: handle error without overwriting err
-		cert, err := getCertFromFile(link)
+		certificates, err := getCertsFromFile(link)
 		if err != nil {
 			return nil, err
 		}
-		certs = append(certs, cert)
+		certs = append(certificates)
 	} else if u.Scheme == "https" {
-		certs, err = getCertFromHTTPS(u)
+		certificates, err := getCertFromHTTPS(u)
 		if err != nil {
 			return nil, err
 		}
+		certs = append(certificates)
 	}
 	// DEBUG: fmt.Printf("--- Host: %s ---\nScheme: %s\nHostname: %s\nPort: %s\n", u.Host, u.Scheme, u.Hostname(), u.Port())
 	return certs, nil
@@ -73,7 +75,7 @@ func getCertFromFile(filePath string) (*x509.Certificate, error) {
 	return cert, nil
 }
 
-func CheckCert(cert *x509.Certificate) ([][]*x509.Certificate, error) {
+func CheckCert(cert *x509.Certificate, roots *x509.CertPool) ([][]*x509.Certificate, error) {
 	/* TODO: expose in flags
 	x509.VerifyOptions{
 		DNSName:                   "",
@@ -83,9 +85,8 @@ func CheckCert(cert *x509.Certificate) ([][]*x509.Certificate, error) {
 		KeyUsages:                 nil,
 		MaxConstraintComparisons: 0,
 	}*/
-	cerPool, _ := x509.SystemCertPool()
 	chains, err := cert.Verify(x509.VerifyOptions{
-		Roots: cerPool,
+		Roots: roots,
 	})
 	if err != nil {
 		return nil, err
@@ -99,4 +100,34 @@ func getSystemCertPool() *x509.CertPool {
 		CertPool = x509.NewCertPool()
 	}
 	return CertPool
+}
+
+func getCertsFromFile(filePath string) ([]*x509.Certificate, error) {
+	// Read the PEM-encoded certificate file
+	certPEM, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		fmt.Println("Failed to read certificate file:", err)
+		return nil, err
+	}
+
+	// Decode the PEM-encoded certificates
+	var certificates []*x509.Certificate
+	for len(certPEM) > 0 {
+		var block *pem.Block
+		block, certPEM = pem.Decode(certPEM)
+		if block == nil {
+			break
+		}
+
+		cert, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			fmt.Println("Failed to parse certificate:", err)
+			return nil, err
+		}
+
+		certificates = append(certificates, cert)
+	}
+
+	// Print the Common Name of each certificate
+	return certificates, nil
 }
