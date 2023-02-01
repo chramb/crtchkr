@@ -18,7 +18,6 @@ func GetCerts(link string) ([]*x509.Certificate, error) {
 	}
 	var certs []*x509.Certificate
 	if u.Host == "" {
-		// TODO: not prettiest but less typing: handle error without overwriting err
 		certificates, err := getCertsFromFile(link)
 		if err != nil {
 			return nil, err
@@ -57,22 +56,6 @@ func getCertFromHTTPS(u *url.URL) ([]*x509.Certificate, error) {
 
 	// TODO: handle more than one certificate
 	return certs, nil
-}
-
-func getCertFromFile(filePath string) (*x509.Certificate, error) {
-	certPEM, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-	block, _ := pem.Decode(certPEM)
-	if block == nil {
-		return nil, errors.New("failed to parse certificate PEM")
-	}
-	cert, err := x509.ParseCertificate(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	return cert, nil
 }
 
 func CheckCert(cert *x509.Certificate, roots *x509.CertPool) ([][]*x509.Certificate, error) {
