@@ -1,9 +1,9 @@
 # Todo list
 TODO.md
-# Test certificates
+# crtchkr files
+doc/
 testdata/
-# binary
-crtchkr
+build/
+crtchkr.toml
 # JetBrains IDE
 .idea/
-crtchkr.toml
