@@ -1,0 +1,28 @@
+# crtchkr.toml
+
+[discord.cert1]
+url = ""
+request = """
+	{
+		"content": "Your Certificates are no longer valid!!\\n found those issues: {{ range . }} \\nCN: {{ .Cert.Subject.CommonName }} -- Error: {{ .Err }}{{ end }}",
+		"username": "Cert Tester 90000"
+	}
+"""
+
+[mail.pwr]
+server = "smtp.gmail.com:465"
+from = ""
+to = [""]
+message = """
+Subject: Test Email
+
+
+Your Certificate is no longer valid:
+{{ range . }}
+---
+CN:\t{{ .Cert.Subject.CommonName}}
+Error:\t {{ .Err }}
+---
+{{ end }}
+"""
+auth = {identity = "", username = "", password = "", host = "smtp.gmail.com"}
