@@ -26,8 +26,8 @@ clean:
 pdf:
 	@Rscript -e 'rmarkdown::render("doc/doc.Rmd", output_format = "pdf_document")'
 
-.PHONY: docs
-docs: $(MANPAGES) ## Generate documentation
+.PHONY: man
+man: $(MANPAGES) ## Generate documentation
 
 $(MANPAGES): %: %.md docdir # .install.md2man
 
