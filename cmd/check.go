@@ -36,7 +36,7 @@ func checkAction(ctx *cli.Context) error {
 		link := ctx.Args().Get(i)
 		certs, err := util.GetCerts(link)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		fmt.Printf("Found %d certificates: %s\n", len(certs), link)
 		certsLen := len(certs)

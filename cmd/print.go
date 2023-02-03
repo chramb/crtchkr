@@ -45,7 +45,7 @@ func printCert(ctx *cli.Context) error {
 		link := ctx.Args().Get(i)
 		certs, err := util.GetCerts(link)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		if argsNum > 1 {
 			fmt.Printf("\n----- %d: %s -----\n", i, certs[0].Subject.CommonName)

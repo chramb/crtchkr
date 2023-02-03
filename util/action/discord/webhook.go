@@ -25,7 +25,7 @@ func Message(ctx *cli.Context, key string) error {
 	myReader := strings.NewReader(data)
 	req, err := http.NewRequest("POST", config.Discord[key].Url, myReader)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
